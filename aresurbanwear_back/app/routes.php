@@ -16,23 +16,22 @@ require '../src/Infrastructure/DB/db.php';
 
 return function (App $app) {
     /*
-
     $app->options('/{routes:.*}', function (Request $request, Response $response) {
         // CORS Pre-Flight OPTIONS Request Handler
         return $response;
     });
-
     $app->get('/', function (Request $request, Response $response) {
         $response->getBody()->write('Hello world!');
         return $response;
     });
-
     $app->group('/users', function (Group $group) {
         $group->get('', ListUsersAction::class);
         $group->get('/{id}', ViewUserAction::class);
     });
+    */
 
-*/
+
+    /* GET CLIENTES BY ID */
     $app->get('/api/cliente/{id}', function (Request $request, Response $response) {
         $idCliente = $request->getAttribute('id');
         $sql = "SELECT * FROM cliente WHERE idCliente = $idCliente";
@@ -53,11 +52,11 @@ return function (App $app) {
         } catch (PDOException $e) {
             $responseText = "Error: " . $e->getMessage();
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
+    /* GET ALL CLIENTES  */
     $app->get('/api/clientes', function (Request $request, Response $response) {
         $sqlConsult = "SELECT * FROM cliente";
         $responseText = "";
@@ -82,7 +81,7 @@ return function (App $app) {
         return $response;
     });
 
-
+    /** REGISTRAR NUEVO CLIENTE */
     $app->post('/api/cliente/add', function (Request $request, Response $response) {
         $params = (array)$request->getParsedBody();
 
@@ -117,6 +116,7 @@ return function (App $app) {
         return $response;
     });
 
+    /* UPDATE CLIENTE BY ID*/
     $app->post('/api/cliente/update/{id}', function (Request $request, Response $response) {
 
         $idCliente = $request->getAttribute('id');
@@ -159,7 +159,35 @@ return function (App $app) {
         return $response;
     });
 
+    /* AUTENTICAR EL CLIENTE */
+    $app->post('/api/cliente/auth', function (Request $request, Response $response) {
+        $params = (array)$request->getParsedBody();
+        $nombreCliente = $params['nombreCliente'];
+        $passwordCliente = $params['passwordCliente'];
+        $sqlConsult = "SELECT * FROM cliente WHERE nombreCliente = :nombreCliente && passwordCliente = :passwordCliente";
+        $responseText = "";
+        try {
+            $db = new db();
+            $db = $db->connectionDB();
+            $res = $db->prepare($sqlConsult);
+            $res->bindParam(':nombreCliente', $nombreCliente);
+            $res->bindParam(':passwordCliente', $passwordCliente);
+            $res->execute();
+            if($res->rowCount() > 0){
+                $responseText = json_encode("Autorizado");
+            }else{
+                $responseText = json_encode("No autorizado");
+            }
+            $res = null;
+            $db = null;
+        } catch (PDOException $e) {
+            $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
+        }
+        $response->getBody()->write($responseText);
+        return $response;
+    });
 
+    /* ELIMINAR CLIENTE BY ID*/
     $app->post('/api/cliente/delete/{id}', function (Request $request, Response $response) {
         $idCliente = $request->getAttribute('id');
         $sqlConsult = "DELETE FROM cliente WHERE idCliente = $idCliente";
@@ -186,8 +214,9 @@ return function (App $app) {
         return $response;
     });
 
-    /* SECTION ARTICLE */
+    /*********************  SECTION ARTICLE ************************/
 
+    /** GET ARTICULO BY ID */
     $app->get('/api/articulo/{id}', function (Request $request, Response $response) {
         $idArticulo = $request->getAttribute('id');
         $sql = "SELECT * FROM articulo WHERE idArticulo = $idArticulo";
@@ -208,11 +237,11 @@ return function (App $app) {
         } catch (PDOException $e) {
             $responseText = "Error: " . $e->getMessage();
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
+    /** GET ALL ARTICULOS */
     $app->get('/api/articulos', function (Request $request, Response $response) {
         $sqlConsult = "SELECT * FROM articulo";
         $responseText = "";
@@ -226,32 +255,25 @@ return function (App $app) {
             } else {
                 $responseText = json_encode("No hay articulos en la bbdd");
             }
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
 
+    /** ADD NEW ARTICULO */
     $app->post('/api/articulo/add', function (Request $request, Response $response) {
         $params = (array)$request->getParsedBody();
-
         $descripcionArticulo = $params['descripcionArticulo'];
         $precioArticulo = $params['precioArticulo'];
-
-
-
-
         $sqlConsult = "INSERT INTO articulo 
         (articulo.descripcionArticulo, 
         articulo.precioArticulo) 
         VALUES (:descripcionArticulo, :precioArticulo)";
-
         $responseText = "";
         try {
             $db = new db();
@@ -259,37 +281,28 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':descripcionArticulo', $descripcionArticulo);
             $res->bindParam(':precioArticulo', $precioArticulo);
-
-
             $res->execute();
             $responseText = json_encode("Articulo almacenado correctamente");
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
+
+    /** UPDATE ARTICULO BY ID */
     $app->post('/api/articulo/update/{id}', function (Request $request, Response $response) {
-
         $idArticulo = $request->getAttribute('id');
-
         $params = (array)$request->getParsedBody();
-
         $descripcionArticulo = $params['descripcionArticulo'];
         $precioArticulo = $params['precioArticulo'];
-
-
-
         $sqlConsult = "UPDATE articulo SET
         descripcionArticulo = :descripcionArticulo, 
         precioArticulo = :precioArticulo
         WHERE idArticulo = $idArticulo";
-
         $responseText = "";
         try {
             $db = new db();
@@ -297,21 +310,19 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':descripcionArticulo', $descripcionArticulo);
             $res->bindParam(':precioArticulo', $precioArticulo);
-
             $res->execute();
             $responseText = json_encode("Articulo actualizado correctamente");
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
 
+    /** DELETE ARTICULO BY ID  */
     $app->post('/api/articulo/delete/{id}', function (Request $request, Response $response) {
         $idArticulo = $request->getAttribute('id');
         $sqlConsult = "DELETE FROM articulo WHERE idCliente = $idArticulo";
@@ -321,25 +332,23 @@ return function (App $app) {
             $db = $db->connectionDB();
             $res = $db->prepare($sqlConsult);
             $res->execute();
-
             if ($res->rowCount() > 0) {
                 $responseText = json_encode("Articulo eliminado correctamente");
             } else {
                 $responseText = json_encode("No existe el articulo con ese ID");
             }
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
-    /* SECTION PEDIDO */
+    /************************************ SECTION PEDIDO ****************************************/
 
+    /** GET PEDIDO BY ID */
     $app->get('/api/pedido/{id}', function (Request $request, Response $response) {
         $idPedido = $request->getAttribute('id');
         $sql = "SELECT * FROM pedido WHERE idPedido = $idPedido";
@@ -360,11 +369,12 @@ return function (App $app) {
         } catch (PDOException $e) {
             $responseText = "Error: " . $e->getMessage();
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
+
+    /** GET ALL PEDIDOS */
     $app->get('/api/pedidos', function (Request $request, Response $response) {
         $sqlConsult = "SELECT * FROM pedido";
         $responseText = "";
@@ -383,23 +393,20 @@ return function (App $app) {
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
 
+    /** ADD NEW PEDIDO */
     $app->post('/api/pedidos/add', function (Request $request, Response $response) {
         $params = (array)$request->getParsedBody();
-
         $idArticulo = $params['idArticulo'];
         $idCliente = $params['idCliente'];
-
         $sqlConsult = "INSERT INTO pedido 
                     (pedido.idArticulo, 
                     pedido.idCliente) 
                     VALUES (:idArticulo, :idCliente)";
-
         $responseText = "";
         try {
             $db = new db();
@@ -407,37 +414,27 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':idArticulo', $idArticulo);
             $res->bindParam(':idCliente', $idCliente);
-
-
             $res->execute();
             $responseText = json_encode("Pedido almacenado correctamente");
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
+    /** UPDATE PEDIDO BY ID */
     $app->post('/api/pedido/update/{id}', function (Request $request, Response $response) {
-
         $idPedido = $request->getAttribute('id');
-
         $params = (array)$request->getParsedBody();
-
         $idArticulo = $params['idArticulo'];
         $idCliente = $params['idCliente'];
-
-
-
         $sqlConsult = "UPDATE pedido SET
                         idArticulo = :idArticulo, 
                         idCliente = :idCliente
                         WHERE idPedido = $idPedido";
-
         $responseText = "";
         try {
             $db = new db();
@@ -445,21 +442,19 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':idArticulo', $idArticulo);
             $res->bindParam(':idCliente', $idCliente);
-
             $res->execute();
             $responseText = json_encode("Pedido actualizado correctamente");
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
 
 
+    /** DELETE PEDIDO BY */
     $app->post('/api/pedido/delete/{id}', function (Request $request, Response $response) {
         $idPedido = $request->getAttribute('id');
         $sqlConsult = "DELETE FROM pedido WHERE idPedido = $idPedido";
@@ -475,13 +470,11 @@ return function (App $app) {
             } else {
                 $responseText = json_encode("No existe el pedido con ese ID");
             }
-
             $res = null;
             $db = null;
         } catch (PDOException $e) {
             $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
         }
-
         $response->getBody()->write($responseText);
         return $response;
     });
