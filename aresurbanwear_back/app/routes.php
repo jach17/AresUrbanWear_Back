@@ -52,6 +52,7 @@ return function (App $app) {
         } catch (PDOException $e) {
             $responseText = "Error: " . $e->getMessage();
         }
+        
         $response->getBody()->write($responseText);
         return $response;
     });
