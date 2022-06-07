@@ -116,4 +116,79 @@ return function (App $app) {
         $response->getBody()->write($responseText);
         return $response;
     });
+
+    $app->post('/api/cliente/update/{id}', function (Request $request, Response $response) {
+
+        $idCliente = $request->getAttribute('id');
+
+        $params = (array)$request->getParsedBody();
+        
+        $nombreCliente = $params['nombreCliente'];
+        $direccionCliente = $params['direccionCliente'];
+        $numTelCliente = $params['numTelCliente'];
+        $passwordCliente = $params['passwordCliente'];
+
+
+        $sqlConsult = "UPDATE cliente SET
+        nombreCliente = :nombreCliente, 
+        direccionCliente = :direccionCliente, 
+        numTelCliente = :numTelCliente,
+        passwordCliente = :passwordCliente 
+        WHERE idCliente = $idCliente";
+
+        $responseText = "";
+        try {
+            $db = new db();
+            $db = $db->connectionDB();
+            $res = $db->prepare($sqlConsult);
+            $res->bindParam(':nombreCliente', $nombreCliente);
+            $res->bindParam(':direccionCliente', $direccionCliente);
+            $res->bindParam(':numTelCliente', $numTelCliente);
+            $res->bindParam(':passwordCliente', $passwordCliente);
+
+            $res->execute();
+            $responseText = json_encode("Cliente actualizado correctamente");
+            
+            $res = null;
+            $db = null;
+        } catch (PDOException $e) {
+            $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
+        }
+
+        $response->getBody()->write($responseText);
+        return $response;
+    });
+
+
+    $app->post('/api/cliente/delete/{id}', function (Request $request, Response $response) {
+        $idCliente = $request->getAttribute('id');
+        $sqlConsult = "DELETE FROM cliente WHERE idCliente = $idCliente";
+        $responseText = "";
+        try {
+            $db = new db();
+            $db = $db->connectionDB();
+            $res = $db->prepare($sqlConsult);
+            $res->execute();
+            
+            if($res->rowCount() > 0){
+                $responseText = json_encode("Cliente eliminado correctamente");
+            }else{
+                $responseText = json_encode("No existe el cliente con ese ID");
+            }
+                
+            $res = null;
+            $db = null;
+        } catch (PDOException $e) {
+            $responseText = json_encode("ERROR EN EL CATCH " . $e->getMessage());
+        }
+
+        $response->getBody()->write($responseText);
+        return $response;
+    });
+
+    /* SECTION ARTICLE */
+
+   
+
+
 };
