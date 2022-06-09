@@ -5,7 +5,7 @@ use PhpParser\Node\Stmt\Return_;
 class db {
     private $dbHost = 'localhost';
     private $dbUser = 'root';
-    private $dbPassword ='12345678';
+    private $dbPassword ='';
     private $dbName = 'aresurbanweardb';
 
     
