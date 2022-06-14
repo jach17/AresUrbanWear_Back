@@ -271,10 +271,14 @@ return function (App $app) {
         $params = (array)$request->getParsedBody();
         $descripcionArticulo = $params['descripcionArticulo'];
         $precioArticulo = $params['precioArticulo'];
+        $detallesArticulo = $params['detallesArticulo'];
+
         $sqlConsult = "INSERT INTO articulo 
         (articulo.descripcionArticulo, 
-        articulo.precioArticulo) 
-        VALUES (:descripcionArticulo, :precioArticulo)";
+        articulo.precioArticulo,
+        articulo.detallesArticulo
+        ) 
+        VALUES (:descripcionArticulo, :precioArticulo, :detallesArticulo)";
         $responseText = "";
         try {
             $db = new db();
@@ -282,6 +286,8 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':descripcionArticulo', $descripcionArticulo);
             $res->bindParam(':precioArticulo', $precioArticulo);
+            $res->bindParam(':detallesArticulo', $detallesArticulo);
+            
             $res->execute();
             $responseText = json_encode("Articulo almacenado correctamente");
             $res = null;
@@ -300,9 +306,12 @@ return function (App $app) {
         $params = (array)$request->getParsedBody();
         $descripcionArticulo = $params['descripcionArticulo'];
         $precioArticulo = $params['precioArticulo'];
+        $detallesArticulo = $params['detallesArticulo'];
+
         $sqlConsult = "UPDATE articulo SET
         descripcionArticulo = :descripcionArticulo, 
-        precioArticulo = :precioArticulo
+        precioArticulo = :precioArticulo,
+        detallesArticulo = :detallesArticulo
         WHERE idArticulo = $idArticulo";
         $responseText = "";
         try {
@@ -311,6 +320,7 @@ return function (App $app) {
             $res = $db->prepare($sqlConsult);
             $res->bindParam(':descripcionArticulo', $descripcionArticulo);
             $res->bindParam(':precioArticulo', $precioArticulo);
+            $res->bindParam('detallesArticulo', $detallesArticulo);
             $res->execute();
             $responseText = json_encode("Articulo actualizado correctamente");
             $res = null;
